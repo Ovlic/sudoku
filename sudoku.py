@@ -1,8 +1,14 @@
 import random, collections, turtle
 from turtle import Turtle, Screen
+import tkinter
+from tkinter import filedialog
+import os
 import copy
 import numpy as np
 screen = Screen()
+screen.setup(width=.50, height=.75, startx=None, starty=None)
+screen.title("Sudoku")
+
 
 # Color console
 class color:
@@ -42,22 +48,150 @@ class SudokuError(Error):
         return f'{self.message}: {self.rownum}, {self.row}'
 
 # Functions
+def split_nums(string):
+    nums = []
+    for a in string:
+        if (a.isnumeric()) == True:
+            nums.append(int(a))
+    return nums
 
 def close_():
     print("Closing window...")
     screen.bye()
 
+def diff(re):
+    root = tkinter
+    screen = Screen()
+    turtle.hideturtle()
+    diff_tle = Turtle(shape="classic", visible=False)
+    diff_tle.speed(11)
+    
+    def close_():
+        print("Closing window...")
+        screen.bye()
+        root.destroy()
+        exit("Quit")
+        return "quit"
+    
+    def exec_pz(d):
+        screen.reset()
+        turtle.hideturtle()
+        diff_tle.reset()
+        diff_tle.hideturtle()
+        
+        if isinstance(d, list) == True: f_draw_sudoku(d, 11)
+        else:
+            remov_ = remove_numbers(list(re), d)
+            f_draw_sudoku(remov_, 11)
+        return "Quit"
+    
+    def clicked_(cx, cy):
+        #print("x: "+str(cx)+" y: "+str(cy))
+        if cx >= -200 and cx <= 200:
+            #print("In a box!")
+            if cy > -200 and cy < -100:
+                print("Extra Hard!")
+                print("Not implemented yet.")
+                #exec_pz(3)
+            elif cy > -100 and cy < 0:
+                print("Hard!")
+                print("Not implemented yet.")
+                #exec_pz(2)
+            elif cy > 0 and cy < 100:
+                print("Medium")
+                exec_pz(1)
+            elif cy > 100 and cy < 200:
+                print("Easy")
+                exec_pz(0)
+            elif cy > -500 and cy < -400:
+                print("Import")
+                
+                root = tkinter.Tk()
+                root.withdraw() #use to hide tkinter window
+
+                def search_for_file_path ():
+                    currdir = os.getcwd()
+                    tempdir = filedialog.askopenfile(parent=root, initialdir=currdir, title='Please select a sudoku file', filetypes=[("Sudoku Files", "*.sudoku")])
+                    print(tempdir)
+                    return tempdir
+
+
+                file_path_ = search_for_file_path()
+                f = open(file_path_.name)
+                pz = f.read()
+                print(pz)
+                print(len(pz))
+                print(pz[2:3])
+                pz_nums = split_nums(pz)
+                r = list(np.array_split(pz_nums, 9))
+                exec_pz(r)
+                
+    turtle.getscreen()
+    screen.title("Set Difficulty")
+    #diff_tle.hideturtle()
+
+    # Set up keybinds
+    print("Setting up Keybinds...")
+    screen.onkey(close_, "Up")
+    screen.onkey(close_, "Escape")
+    screen.listen()
+
+    diff_tle.penup()
+    diff_tle.right(90)
+    diff_tle.goto(200, 200)
+    diff_types = ["Easy", "Medium", "Coming Soon", "Coming Soon"]
+    j = -1
+
+    for i in range(200, -200, -100):
+        j += 1
+        diff_level = diff_types[j]
+        diff_tle.penup()
+        diff_tle.pendown()
+        diff_tle.setx(-200)
+        diff_tle.sety(i-100)
+        diff_tle.setx(200)
+        diff_tle.sety(i)
+        diff_tle.setx(-100)
+        diff_tle.penup()
+        diff_tle.setx(0)
+        diff_tle.sety(i-75)
+        diff_tle.write(diff_level, False, align="center", font=("Verdana", 35, "normal"))
+        diff_tle.sety(i)
+    
+    diff_tle.penup()
+    diff_tle.sety(-300)
+    diff_tle.write("(Hard and extra-hard require different code to hide the numbers)", False, align="center", font=("Verdana", 20, "normal"))
+    diff_tle.sety(-400)
+    diff_tle.pendown()
+    diff_tle.setx(-200)
+    diff_tle.sety(-500)
+    diff_tle.setx(200)
+    diff_tle.sety(-400)
+    diff_tle.setx(-100)
+    diff_tle.penup()
+    diff_tle.setx(0)
+    diff_tle.sety(-400-75)
+    diff_tle.write("Import From File", False, align="center", font=("Verdana", 35, "normal"))
+
+    screen.onscreenclick(clicked_, 1)
+    print("Done")
+    turtle.mainloop()
+
+
 def draw_sudoku(r1, r2, r3, r4, r5, r6, r7, r8, r9, sp=None):
+    global ans_
+    global usr_n
     screen = Screen()
 
     turtle.getscreen()
     screen.title("Sudoku")
     turtle.hideturtle()
-    TURTLE_SIZE = 20
+    print(screen.screensize())
 
     def close_():
         print("Closing window...")
         screen.bye()
+        return "Quit"
 
     # Set up keybinds
     print("Setting up Keybinds...")
@@ -94,6 +228,42 @@ def draw_sudoku(r1, r2, r3, r4, r5, r6, r7, r8, r9, sp=None):
     yertle.goto(yertle.xcor(), abs(yertle.ycor()))
     yertle.hideturtle()
     yertle.penup()
+
+    # Drawing "Save" btn
+    yertle.goto(-590, -490)
+    yertle.fillcolor("black")
+    yertle.pencolor("black")
+    yertle.begin_fill()
+    yertle.pendown()
+    yertle.sety(-530)
+    yertle.setx(-330)
+    yertle.sety(-490)
+
+    yertle.penup()
+    yertle.end_fill()
+    yertle.goto(-459.5, -525)
+    yertle.pencolor("white")
+    yertle.write("Save", False, align="center", font=("Verdana", 20, "normal"))
+
+    # Drawing "show answer" btn
+    yertle.goto(330, -490)
+    yertle.fillcolor("black")
+    yertle.pencolor("black")
+    yertle.begin_fill()
+    yertle.pendown()
+    yertle.sety(-530)
+    yertle.setx(590)
+    yertle.sety(-490)
+
+    yertle.penup()
+    yertle.end_fill()
+    yertle.goto(459.5, -525)
+    yertle.pencolor("white")
+    yertle.write("Solve", False, align="center", font=("Verdana", 20, "normal"))
+           
+
+
+    #cx > -591 and cx < -330 and cy > -530 and cy < -490
 
     x_start = -screen.window_width()/2+50
     x_end = screen.window_width()/2-50
@@ -178,35 +348,78 @@ def draw_sudoku(r1, r2, r3, r4, r5, r6, r7, r8, r9, sp=None):
         arr.append([x_arr, y_arr])
     #print(arr)
 
+    ans_ = 0
+    usr_n = []
+
     def clicked_(cx, cy):
-        print("clicked at "+str(cx)+", "+str(cy))
+        #print("clicked at "+str(cx)+", "+str(cy))
         is_column = False
         is_row = False
+        clicked_save_btn = False
+        reveal_answer = False
         clicked_column = None
         clicked_row = None
         for i in range(0, 9):
             if cx >= arr[i][0][0] and cx <= arr[i][0][1]:
                 is_column = True
                 clicked_column = i
-                print("You clicked column "+str(i+1))
+                #print("You clicked column "+str(i+1))
                 break
         for i in range(0, 9):
             if cy >= arr[i][1][0] and cy <= arr[i][1][1]:
                 is_row = True
                 clicked_row = i
-                print("You clicked row "+str(i+1))
+                #print("You clicked row "+str(i+1))
                 break
+        if cx > -591 and cx < -330 and cy > -530 and cy < -490:
+            #print("Clicked save btn")
+            clicked_save_btn = True
+
+        if cx < 591 and cx > 330 and cy > -530 and cy < -490:
+            #print("clicked reveal answer")
+            reveal_answer = True
         
-        if is_column == True and is_row == True:
-            input_num = int(screen.numinput("Input", "Please enter value for box", minval=1, maxval=9))
-            print(input_num)
-            print(r9)
-            if isinstance(input_num, int) == True:
-                rows_[clicked_row][clicked_column] = input_num
-                #write_num.clearstamps()
-                #write_num.goto(x_start+((x_pos*clicked_column)+(x_pos/2)), y_start-((y_pos*clicked_row)+(y_pos/2))-25)
-                #write_num.write(input_num, True, align="center", font=("Verdana", 40, "normal"))
-                sudoku_write_nums(r1, r2, r3, r4, r5, r6, r7, r8, r9, redraw=True)
+        if is_column == True and is_row == True or clicked_save_btn == True or reveal_answer == True:
+            if clicked_save_btn == False and reveal_answer == False:
+                input_num = screen.numinput("Input", "Please enter value for box", minval=1, maxval=9)
+                if input_num == None: return
+                input_num = int(input_num)
+                #print(input_num)
+                if isinstance(input_num, int) == True:
+                    rows_[clicked_row][clicked_column] = input_num
+                    #write_num.clearstamps()
+                    #write_num.goto(x_start+((x_pos*clicked_column)+(x_pos/2)), y_start-((y_pos*clicked_row)+(y_pos/2))-25)
+                    #write_num.write(input_num, True, align="center", font=("Verdana", 40, "normal"))
+                    sudoku_write_nums(r1, r2, r3, r4, r5, r6, r7, r8, r9, redraw=True)
+            elif clicked_save_btn == True:
+                # Save puzzle
+                currdir = os.getcwd()
+                root = tkinter.Tk()
+                root.withdraw()
+                directory = filedialog.asksaveasfilename(parent=root, initialdir=currdir, title='Save As', filetypes=[("Sudoku Files", "*.sudoku")], defaultextension=".sudoku")
+                if directory == '': return
+                f = open(directory, "w")
+                f.write(str([r1, r2, r3, r4, r5, r6, r7, r8, r9]))
+                f.close()
+            elif reveal_answer == True:
+                global ans_
+                global usr_n
+                ans_ += 1
+                if (ans_ % 2) == 0:
+                    btn_txt = "Solve"
+                    for w in range(0, (81*2)):
+                        write_num.undo()
+                    #sudoku_write_nums(usr_n[0], usr_n[1], usr_n[2], usr_n[3], usr_n[4], usr_n[5], usr_n[6], usr_n[7], usr_n[8])
+                else:
+                    r___ = [copy.deepcopy(r1), copy.deepcopy(r2), copy.deepcopy(r3), copy.deepcopy(r4), copy.deepcopy(r5), copy.deepcopy(r6), copy.deepcopy(r7), copy.deepcopy(r8), copy.deepcopy(r9)]
+                    for q in range(0, 9):
+                        usr_n.append(r___[q])
+                    btn_txt = "Hide Answer"
+                    ss = solveSudoku([r1, r2, r3, r4, r5, r6, r7, r8, r9])
+                    sudoku_write_nums(ss[1][0], ss[1][1], ss[1][2], ss[1][3], ss[1][4], ss[1][5], ss[1][6], ss[1][7], ss[1][8])
+                yertle.undo()
+                yertle.write(btn_txt, False, align="center", font=("Verdana", 20, "normal"))
+        screen.listen()
         
 
     screen.onscreenclick(clicked_, 1)
@@ -290,37 +503,58 @@ def solveSudoku(board):
 
     elif len(values) > 81: return False, []
 
-def remove_numbers(r):
+def remove_numbers(r, diff):
     cant_remove = [] # List of ii jj that cant be removed
     remove_ = True
     rows_count = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     to_be_picked = [[0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3, 4, 5, 6, 7, 8]]
+    
+    print(diff)
+    if diff == 0:
+        # Easy
+        set_dif = 28
+        #print("28 Numbers expected")
+    elif diff == 1:
+        # Medium
+        set_dif = 25
+        #print("25 Numbers expected")
+    elif diff == 2:
+        # Hard
+        set_dif = 22
+        #print("22 Numbers expected")
+    elif diff == 3:
+        set_dif = 17
+        #print("17 Numbers expected")
 
     while remove_ == True:
         
         change_num = False
-        ii = random.choice(rows_count)        
+        try:
+            ii = random.choice(rows_count)
+        except:
+            print("Cant remove:")
+            print(len(cant_remove))
+        #print(rows_count)
+        print(to_be_picked)
         jj = random.randrange(0, 9)
 
         
         if jj not in to_be_picked[ii]:
             # Change number by picking from the same row
-            print(ii)
-            print(to_be_picked[ii])
             jj = random.choice(to_be_picked[ii])
 
 
         if r[ii][jj] == 0:
-            print("Number picked was 0...")
+            # print("Number picked was 0...")
             change_num = True
         
         for g in range(0, len(cant_remove)):
             if ii == cant_remove[g][0] and jj == cant_remove[g][1]:
-                print("Number picked was in unremovable list...")
+                # print("Number picked was in unremovable list...")
                 change_num = True
         
         if change_num == True:
-            print("Changing Number...")
+            # print("Changing Number...")
             continue
         num = copy.deepcopy(r[ii][jj])
         to_be_picked[ii].remove(jj)
@@ -329,21 +563,28 @@ def remove_numbers(r):
             rows_count.remove(ii)
 
         r[ii][jj] = 0
-        print("Checking solutions...")
+        # print("Checking solutions...")
         check = solveSudoku(r)
         if check[0] == False:
-            print(str(int(len(values)/81))+" solutions found...")
+            # print(str(int(len(values)/81))+" solutions found...")
             r[ii][jj] = num
-            print("Adding unremovable number to list of unremovable numbers")
+            # print("Adding unremovable number to list of unremovable numbers")
             cant_remove.append([ii, jj])
-        else: print("Single solution found...")
+        # else: print("Single solution found...")
 
         not_zero_count = 0
+        still_need_to_be_picked = 0
         for g in range(0, 9):
             for h in range(0, 9):
                 if r[g][h] != 0: not_zero_count += 1
 
-        if not_zero_count == 24 or len(cant_remove) == not_zero_count: 
+        for g in range(0, len(to_be_picked)):
+            still_need_to_be_picked += len(to_be_picked[g])
+
+        if not_zero_count == set_dif:# or len(cant_remove) == not_zero_count:
+            print("Zeros: "+str(not_zero_count))
+            print(len(cant_remove))
+            print("Expected numbers: "+str(set_dif))
             remove_ = False
             return r
         print("Zeros: "+str(not_zero_count))
@@ -667,127 +908,130 @@ def s_board(r1, r2, r3, r4, r5, r6, r7, r8, r9):
 ╚═══╧═══╧═══╩═══╧═══╧═══╩═══╧═══╧═══╝"""
     return board
 
+def gen_sudoku():
+    # Getting original rows
+    row1 = test_rows()
+    row2 = test_sl(row1, 3)
+    row3 = test_sl(row2, 3)
+    row4 = test_sl(row3, -1)
+    row5 = test_sl(row4, 3)
+    row6 = test_sl(row5, 3)
+    row7 = test_sl(row6, -1)
+    row8 = test_sl(row7, 3)
+    row9 = test_sl(row8, 3)
 
-# Getting original rows
-row1 = test_rows()
-row2 = test_sl(row1, 3)
-row3 = test_sl(row2, 3)
-row4 = test_sl(row3, -1)
-row5 = test_sl(row4, 3)
-row6 = test_sl(row5, 3)
-row7 = test_sl(row6, -1)
-row8 = test_sl(row7, 3)
-row9 = test_sl(row8, 3)
-
-rrr = random.randrange(80, 800)
-print(rrr)
-for j in range(1, rrr):
-    # Shuffling the rows and columns a random amount of times
-    s = ()
-    g = (row1, row2, row3, row4, row5, row6, row7, row8, row9)
-    rr = random.randrange(10, 31)
-    for i in range(1, rr):
-        s = testshuffle(g[0], g[1], g[2], g[3], g[4], g[5], g[6], g[7], g[8])
-        if i == rr:
-            if rr % 2 == 0:
+    rrr = random.randrange(80, 800)
+    for j in range(1, rrr):
+        # Shuffling the rows and columns a random amount of times
+        s = ()
+        g = (row1, row2, row3, row4, row5, row6, row7, row8, row9)
+        rr = random.randrange(10, 31)
+        for i in range(1, rr):
+            s = testshuffle(g[0], g[1], g[2], g[3], g[4], g[5], g[6], g[7], g[8])
+            if i == rr:
+                if rr % 2 == 0:
+                    g = c(s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8])
+                    row1 = g[0]
+                    row2 = g[1]
+                    row3 = g[2]
+                    row4 = g[3]
+                    row5 = g[4]
+                    row6 = g[5]
+                    row7 = g[6]
+                    row8 = g[7]
+                    row9 = g[8]
+                    break
+                else:
+                    row1 = s[0]
+                    row2 = s[1]
+                    row3 = s[2]
+                    row4 = s[3]
+                    row5 = s[4]
+                    row6 = s[5]
+                    row7 = s[6]
+                    row8 = s[7]
+                    row9 = s[8]
+                    break
+            elif i != rr:
                 g = c(s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8])
-                row1 = g[0]
-                row2 = g[1]
-                row3 = g[2]
-                row4 = g[3]
-                row5 = g[4]
-                row6 = g[5]
-                row7 = g[6]
-                row8 = g[7]
-                row9 = g[8]
-                break
-            else:
-                row1 = s[0]
-                row2 = s[1]
-                row3 = s[2]
-                row4 = s[3]
-                row5 = s[4]
-                row6 = s[5]
-                row7 = s[6]
-                row8 = s[7]
-                row9 = s[8]
-                break
-        elif i != rr:
-            g = c(s[0], s[1], s[2], s[3], s[4], s[5], s[6], s[7], s[8])
+
+        t_check(row1, row2, row3, row4, row5, row6, row7, row8, row9)
+        # print_res((row1, row2, row3, row4, row5, row6, row7, row8, row9))
+
+
+        # Randomly rotate or flip the rows a random amount of times
+        rr = random.randrange(20, 41)
+        for i in range(1, rr):
+            rf = random.randrange(1, 6)
+
+            if rf == 1:
+                e = test_rL(row1, row2, row3, row4, row5, row6, row7, row8, row9)
+                row1 = e[0]
+                row2 = e[1]
+                row3 = e[2]
+                row4 = e[3]
+                row5 = e[4]
+                row6 = e[5]
+                row7 = e[6]
+                row8 = e[7]
+                row9 = e[8]
+            elif rf == 2:
+                e = test_rR(row1, row2, row3, row4, row5, row6, row7, row8, row9)
+                row1 = e[0]
+                row2 = e[1]
+                row3 = e[2]
+                row4 = e[3]
+                row5 = e[4]
+                row6 = e[5]
+                row7 = e[6]
+                row8 = e[7]
+                row9 = e[8]
+            elif rf == 3:
+                e = test_rV(row1, row2, row3, row4, row5, row6, row7, row8, row9)
+                row1 = e[0]
+                row2 = e[1]
+                row3 = e[2]
+                row4 = e[3]
+                row5 = e[4]
+                row6 = e[5]
+                row7 = e[6]
+                row8 = e[7]
+                row9 = e[8]
+            elif rf == 4:
+                e = test_fS(row1, row2, row3, row4, row5, row6, row7, row8, row9)
+                row1 = e[0]
+                row2 = e[1]
+                row3 = e[2]
+                row4 = e[3]
+                row5 = e[4]
+                row6 = e[5]
+                row7 = e[6]
+                row8 = e[7]
+                row9 = e[8]
+            elif rf == 5:
+                e = test_fV(row1, row2, row3, row4, row5, row6, row7, row8, row9)
+                row1 = e[0]
+                row2 = e[1]
+                row3 = e[2]
+                row4 = e[3]
+                row5 = e[4]
+                row6 = e[5]
+                row7 = e[6]
+                row8 = e[7]
+                row9 = e[8]
 
     t_check(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-    # print_res((row1, row2, row3, row4, row5, row6, row7, row8, row9))
+    return row1, row2, row3, row4, row5, row6, row7, row8, row9
 
+s = gen_sudoku()
 
-    # Randomly rotate or flip the rows a random amount of times
-    rr = random.randrange(20, 41)
-    for i in range(1, rr):
-        rf = random.randrange(1, 6)
+d = diff(s)
+print("Done")
 
-        if rf == 1:
-            e = test_rL(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-            row1 = e[0]
-            row2 = e[1]
-            row3 = e[2]
-            row4 = e[3]
-            row5 = e[4]
-            row6 = e[5]
-            row7 = e[6]
-            row8 = e[7]
-            row9 = e[8]
-        elif rf == 2:
-            e = test_rR(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-            row1 = e[0]
-            row2 = e[1]
-            row3 = e[2]
-            row4 = e[3]
-            row5 = e[4]
-            row6 = e[5]
-            row7 = e[6]
-            row8 = e[7]
-            row9 = e[8]
-        elif rf == 3:
-            e = test_rV(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-            row1 = e[0]
-            row2 = e[1]
-            row3 = e[2]
-            row4 = e[3]
-            row5 = e[4]
-            row6 = e[5]
-            row7 = e[6]
-            row8 = e[7]
-            row9 = e[8]
-        elif rf == 4:
-            e = test_fS(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-            row1 = e[0]
-            row2 = e[1]
-            row3 = e[2]
-            row4 = e[3]
-            row5 = e[4]
-            row6 = e[5]
-            row7 = e[6]
-            row8 = e[7]
-            row9 = e[8]
-        elif rf == 5:
-            e = test_fV(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-            row1 = e[0]
-            row2 = e[1]
-            row3 = e[2]
-            row4 = e[3]
-            row5 = e[4]
-            row6 = e[5]
-            row7 = e[6]
-            row8 = e[7]
-            row9 = e[8]
+#re = remove_numbers([row1, row2, row3, row4, row5, row6, row7, row8, row9])
 
-print("||||||||||||||||||||")
-t_check(row1, row2, row3, row4, row5, row6, row7, row8, row9)
-
-re = remove_numbers([row1, row2, row3, row4, row5, row6, row7, row8, row9])
-
-f_draw_sudoku(re, 11)
+#f_draw_sudoku(re, 11)
 
 
 
-#f_s_board(s)
 
